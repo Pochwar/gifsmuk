@@ -8,8 +8,8 @@ var TwitterApi = require('twitter-api-v2').TwitterApi;
 var image_downloader_1 = __importDefault(require("image-downloader"));
 var mkdirp = require('mkdirp');
 var fs_1 = __importDefault(require("fs"));
-var App = /** @class */ (function () {
-    function App(appKey, appSecret, accessToken, accessSecret) {
+var TwitterApp = /** @class */ (function () {
+    function TwitterApp(env) {
         this.consoleLogGreen = function (s) {
             console.log('\x1b[32m', s, '\x1b[0m');
         };
@@ -19,12 +19,25 @@ var App = /** @class */ (function () {
         this.consoleLogYellow = function (s) {
             console.log('\x1b[33m', s, '\x1b[0m');
         };
-        this.twitterClient = new TwitterApi({ appKey: appKey, appSecret: appSecret, accessToken: accessToken, accessSecret: accessSecret });
+        if (env.TWITTER_CONSUMER_KEY === undefined
+            || env.TWITTER_CONSUMER_SECRET === undefined
+            || env.TWITTER_ACCESS_TOKEN_KEY === undefined
+            || env.TWITTER_ACCESS_TOKEN_SECRET === undefined) {
+            console.log('Please provide Twitter\'s Consumer Key, Consumer Secret, Access Token Key & Access Token Secret in .env file');
+        }
+        else {
+            this.twitterClient = new TwitterApi({
+                appKey: env.TWITTER_CONSUMER_KEY,
+                appSecret: env.TWITTER_CONSUMER_SECRET,
+                accessToken: env.TWITTER_ACCESS_TOKEN_KEY,
+                accessSecret: env.TWITTER_ACCESS_TOKEN_SECRET
+            });
+        }
     }
-    App.prototype.setPath = function (path) {
+    TwitterApp.prototype.setPath = function (path) {
         this.path = path;
     };
-    App.prototype.run = function (keyword) {
+    TwitterApp.prototype.run = function (keyword) {
         var _this = this;
         this.setPath("downloaded_images/".concat(keyword));
         console.log('###########################################');
@@ -82,7 +95,7 @@ var App = /** @class */ (function () {
             });
         });
     };
-    App.prototype.isNew = function (media_id) {
+    TwitterApp.prototype.isNew = function (media_id) {
         var isNew = true;
         fs_1.default.readdirSync(this.path).forEach(function (file) {
             var pattern = new RegExp(/([0-9]*)(-@)(.*)/gm);
@@ -93,6 +106,6 @@ var App = /** @class */ (function () {
         });
         return isNew;
     };
-    return App;
+    return TwitterApp;
 }());
-exports.default = App;
+exports.default = TwitterApp;

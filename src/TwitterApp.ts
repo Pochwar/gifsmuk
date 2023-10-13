@@ -4,13 +4,27 @@ import download, { DownloadResult } from 'image-downloader';
 const mkdirp = require('mkdirp');
 import fs from 'fs';
 
-export default class App {
+export default class TwitterApp {
   private twitterClient: any;
 
   private path!: string;
 
-  constructor(appKey: string, appSecret: string, accessToken: string, accessSecret: string) {
-    this.twitterClient = new TwitterApi({ appKey, appSecret, accessToken, accessSecret });
+  constructor(env: any) {
+    if (
+      env.TWITTER_CONSUMER_KEY === undefined
+      || env.TWITTER_CONSUMER_SECRET === undefined
+      || env.TWITTER_ACCESS_TOKEN_KEY === undefined
+      || env.TWITTER_ACCESS_TOKEN_SECRET === undefined
+    ) {
+      console.log('Please provide Twitter\'s Consumer Key, Consumer Secret, Access Token Key & Access Token Secret in .env file')
+    } else {
+      this.twitterClient = new TwitterApi({
+        appKey: env.TWITTER_CONSUMER_KEY,
+        appSecret: env.TWITTER_CONSUMER_SECRET,
+        accessToken: env.TWITTER_ACCESS_TOKEN_KEY,
+        accessSecret: env.TWITTER_ACCESS_TOKEN_SECRET
+      });
+    }
   }
 
   private setPath(path: string): void {
