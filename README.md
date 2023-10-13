@@ -1,8 +1,21 @@
-# GIFTUH
-Get Images From Tweets Using Hashtag
+# GIFSMUK
+Get Images From Social Medias Using Keyword
+
+## WIP
+`node src.run.js` to retrieve images from IG
+### TODO
+
+- [ ] put `src/run.js` logic in IGApp.ts
+- [ ] save images
+- [ ] make whole script run by fixing TS errors
 
 ## Description
-This project is about to get images from tweets that contains a specific keyword or hashtag. Images will be downloaded into the `downloaded_images` folder.
+This project is born after my other project [GIFTUH](https://github.com/Pochwar/giftuh) that retrieved images from Twitter only is no longer working.
+
+So I decided to make another one that could do the same thing from other Social Medias, like Instagram.
+
+So, the purpose of this project is to retrieve images from posts that contains a specific keyword or hashtag. Images will be downloaded into the `downloaded_images` folder.
+
 
 # Prerequires
 
