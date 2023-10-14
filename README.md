@@ -5,9 +5,12 @@ Get Images From Social Medias Using Keyword
 `node src.run.js` to retrieve images from IG
 ### TODO
 
-- [ ] put `src/run.js` logic in IGApp.ts
-- [ ] save images
-- [ ] make whole script run by fixing TS errors
+- [x] put `src/run.js` logic in IGApp.ts
+- [x] save images
+- [x] make whole script run by fixing TS errors
+- [ ] make script keep running with setInterval
+- [ ] test to retrieve recents tags
+- [ ] factorize code
 
 ## Description
 This project is born after my other project [GIFTUH](https://github.com/Pochwar/giftuh) that retrieved images from Twitter only is no longer working.
