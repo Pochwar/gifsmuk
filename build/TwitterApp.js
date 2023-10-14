@@ -1,25 +1,11 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+var _utils_1 = require("./_utils");
 require('dotenv').config();
 var twitter_api_v2_1 = require("twitter-api-v2");
 var TwitterApi = require('twitter-api-v2').TwitterApi;
-var image_downloader_1 = __importDefault(require("image-downloader"));
-var mkdirp = require('mkdirp');
-var fs_1 = __importDefault(require("fs"));
 var TwitterApp = /** @class */ (function () {
     function TwitterApp() {
-        this.consoleLogGreen = function (s) {
-            console.log('\x1b[32m', s, '\x1b[0m');
-        };
-        this.consoleLogRed = function (s) {
-            console.log('\x1b[31m', s, '\x1b[0m');
-        };
-        this.consoleLogYellow = function (s) {
-            console.log('\x1b[33m', s, '\x1b[0m');
-        };
         if (process.env.TWITTER_CONSUMER_KEY === undefined
             || process.env.TWITTER_CONSUMER_SECRET === undefined
             || process.env.TWITTER_ACCESS_TOKEN_KEY === undefined
@@ -35,12 +21,7 @@ var TwitterApp = /** @class */ (function () {
             });
         }
     }
-    TwitterApp.prototype.setPath = function (path) {
-        this.path = path;
-    };
     TwitterApp.prototype.run = function (keyword) {
-        var _this = this;
-        this.setPath("downloaded_images/".concat(keyword));
         console.log('###########################################');
         console.log("# Looking for \"".concat(keyword, "\" images in tweets "));
         console.log('###########################################');
@@ -54,58 +35,20 @@ var TwitterApp = /** @class */ (function () {
                 console.log("User ID: ".concat(user_id));
                 console.log("User name: @".concat(user_name));
                 if (event && event.entities && event.entities.media) {
-                    var media_url_1 = event.entities.media[0].media_url;
-                    var media_id_1 = event.entities.media[0].id_str;
-                    _this.consoleLogYellow('One media found :D');
-                    _this.consoleLogYellow("URL: ".concat(media_url_1));
-                    // Set subfolder path where to save images
-                    var path_1 = "downloaded_images/".concat(keyword);
-                    // Create subfolder if not exist
-                    mkdirp("".concat(__dirname, "/../").concat(path_1), function (err) {
-                        if (err) {
-                            console.error(err);
-                        }
-                        else {
-                            // Set download options
-                            var options = {
-                                url: media_url_1,
-                                dest: "".concat(__dirname, "/../").concat(path_1, "/").concat(media_id_1, "-@").concat(user_name, "-(id:").concat(user_id, ").jpg"),
-                            };
-                            // Save image if new
-                            if (_this.isNew(media_id_1)) {
-                                image_downloader_1.default.image(options)
-                                    .then(function (result) {
-                                    _this.consoleLogGreen("File saved to: ".concat(result.filename));
-                                })
-                                    .catch(function (err) {
-                                    console.error(err);
-                                });
-                            }
-                            else {
-                                _this.consoleLogRed("File already exists, download aborted");
-                            }
-                        }
-                    });
+                    var media_url = event.entities.media[0].media_url;
+                    var media_id = event.entities.media[0].id_str;
+                    (0, _utils_1.consoleLogYellow)('One media found 😀');
+                    (0, _utils_1.consoleLogYellow)("URL: ".concat(media_url));
+                    (0, _utils_1.saveImg)(keyword, media_url, media_id, user_name, user_id);
                 }
                 else {
-                    console.log('No media found :/');
+                    console.log('No media found 🫤');
                 }
             });
             stream.on(twitter_api_v2_1.ETwitterStreamEvent.Error, function (error) {
                 console.log("Error: ".concat(error));
             });
         });
-    };
-    TwitterApp.prototype.isNew = function (media_id) {
-        var isNew = true;
-        fs_1.default.readdirSync(this.path).forEach(function (file) {
-            var pattern = new RegExp(/([0-9]*)(-@)(.*)/gm);
-            var res = pattern.exec(file);
-            if (res && res[1] === media_id) {
-                isNew = false;
-            }
-        });
-        return isNew;
     };
     return TwitterApp;
 }());
