@@ -1,6 +1,8 @@
-import TwitterApp from './TwitterApp';
-import IGApp from './IGApp';
-// require('dotenv').config();
+// @ts-ignore
+import TwitterApp from "./TwitterApp";
+// @ts-ignore
+import IGApp from "./IGApp";
+
 
 // Get keyword from command line
 const client = process.argv[2];
@@ -9,10 +11,10 @@ let app;
 
 switch (client) {
   case 'instagram':
-    app = new IGApp(process.env);
+    app = new IGApp();
     break;
   case 'twitter':
-    app = new TwitterApp(process.env);
+    app = new TwitterApp();
     break;
   default:
     console.log('Invalid client')

@@ -3,13 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require('dotenv').config();
 var twitter_api_v2_1 = require("twitter-api-v2");
 var TwitterApi = require('twitter-api-v2').TwitterApi;
 var image_downloader_1 = __importDefault(require("image-downloader"));
 var mkdirp = require('mkdirp');
 var fs_1 = __importDefault(require("fs"));
 var TwitterApp = /** @class */ (function () {
-    function TwitterApp(env) {
+    function TwitterApp() {
         this.consoleLogGreen = function (s) {
             console.log('\x1b[32m', s, '\x1b[0m');
         };
@@ -19,18 +20,18 @@ var TwitterApp = /** @class */ (function () {
         this.consoleLogYellow = function (s) {
             console.log('\x1b[33m', s, '\x1b[0m');
         };
-        if (env.TWITTER_CONSUMER_KEY === undefined
-            || env.TWITTER_CONSUMER_SECRET === undefined
-            || env.TWITTER_ACCESS_TOKEN_KEY === undefined
-            || env.TWITTER_ACCESS_TOKEN_SECRET === undefined) {
+        if (process.env.TWITTER_CONSUMER_KEY === undefined
+            || process.env.TWITTER_CONSUMER_SECRET === undefined
+            || process.env.TWITTER_ACCESS_TOKEN_KEY === undefined
+            || process.env.TWITTER_ACCESS_TOKEN_SECRET === undefined) {
             console.log('Please provide Twitter\'s Consumer Key, Consumer Secret, Access Token Key & Access Token Secret in .env file');
         }
         else {
             this.twitterClient = new TwitterApi({
-                appKey: env.TWITTER_CONSUMER_KEY,
-                appSecret: env.TWITTER_CONSUMER_SECRET,
-                accessToken: env.TWITTER_ACCESS_TOKEN_KEY,
-                accessSecret: env.TWITTER_ACCESS_TOKEN_SECRET
+                appKey: process.env.TWITTER_CONSUMER_KEY,
+                appSecret: process.env.TWITTER_CONSUMER_SECRET,
+                accessToken: process.env.TWITTER_ACCESS_TOKEN_KEY,
+                accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET
             });
         }
     }

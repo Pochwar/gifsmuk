@@ -1,3 +1,4 @@
+require('dotenv').config();
 import { ETwitterStreamEvent, TweetStream } from 'twitter-api-v2';
 const { TwitterApi } = require('twitter-api-v2');
 import download, { DownloadResult } from 'image-downloader';
@@ -9,20 +10,20 @@ export default class TwitterApp {
 
   private path!: string;
 
-  constructor(env: any) {
+  constructor() {
     if (
-      env.TWITTER_CONSUMER_KEY === undefined
-      || env.TWITTER_CONSUMER_SECRET === undefined
-      || env.TWITTER_ACCESS_TOKEN_KEY === undefined
-      || env.TWITTER_ACCESS_TOKEN_SECRET === undefined
+      process.env.TWITTER_CONSUMER_KEY === undefined
+      || process.env.TWITTER_CONSUMER_SECRET === undefined
+      || process.env.TWITTER_ACCESS_TOKEN_KEY === undefined
+      || process.env.TWITTER_ACCESS_TOKEN_SECRET === undefined
     ) {
       console.log('Please provide Twitter\'s Consumer Key, Consumer Secret, Access Token Key & Access Token Secret in .env file')
     } else {
       this.twitterClient = new TwitterApi({
-        appKey: env.TWITTER_CONSUMER_KEY,
-        appSecret: env.TWITTER_CONSUMER_SECRET,
-        accessToken: env.TWITTER_ACCESS_TOKEN_KEY,
-        accessSecret: env.TWITTER_ACCESS_TOKEN_SECRET
+        appKey: process.env.TWITTER_CONSUMER_KEY,
+        appSecret: process.env.TWITTER_CONSUMER_SECRET,
+        accessToken: process.env.TWITTER_ACCESS_TOKEN_KEY,
+        accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET
       });
     }
   }
