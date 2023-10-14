@@ -1,14 +1,11 @@
-import fs from 'fs';
-import download, { DownloadResult } from 'image-downloader';
+import { consoleLogRed, consoleLogYellow, saveImg } from './_utils';
 require('dotenv').config();
 const { IgApiClient } = require('instagram-private-api');
-const mkdirp = require('mkdirp');
 
 export default class IGApp {
   private client: any;
-  private username!: string;
-  private password!: string;
-  private path!: string;
+  private readonly username!: string;
+  private readonly password!: string;
 
   constructor() {
     if (
@@ -23,69 +20,49 @@ export default class IGApp {
     }
   }
 
-  private setPath(path: string): void {
-    this.path = path;
-  }
-
   public async run(keyword: string) {
-    this.setPath(`downloaded_images/${keyword}`);
     this.client.state.generateDevice(this.username);
     await this.client.simulate.preLoginFlow();
     const loggedInUser = await this.client.account.login(this.username, this.password);
 
-    const tags = this.client.feed.tags(keyword);
-    const posts = await tags.items();
-    posts.forEach((post: any) => {
-      if (undefined !== post) {
-        if (undefined !== post.image_versions2) {
-          const user_id = post.user.id;
-          const user_name = post.user.username;
-          console.log('########################################')
-          console.log(`New result found for keyword: ${keyword}`)
-          console.log(`User ID: ${user_id}`)
-          console.log(`User name: @${user_name}`)
-          const candidates = post.image_versions2.candidates
-          const greater = this.findGreaterImg(candidates);
+    setInterval(async () => {
+      try {
+        const tags = this.client.feed.tags(keyword);
+        const posts = await tags.items();
+        for (const post of posts) {
+          if (undefined !== post) {
+            const user_id = post.user.id;
+            const user_name = post.user.username;
+            console.log('########################################')
+            console.log(`New result found for keyword: ${keyword}`)
+            console.log(`User ID: ${user_id}`)
+            console.log(`User name: @${user_name}`)
+            if (undefined !== post.image_versions2) {
+              const candidates = post.image_versions2.candidates
+              const greater = this.findGreaterImg(candidates);
 
-          const media_url = greater.url
-          const media_id = post.caption.media_id
-
-          // Set subfolder path where to save images
-          const path = `downloaded_images/${keyword}`;
-
-          // Create subfolder if not exist
-          mkdirp(`${__dirname}/../${path}`, (err: Error) => {
-            if (err) {
-              console.error(err)
-            } else {
-              // Set download options
-              const options = {
-                url: media_url,
-                dest: `${__dirname}/../${path}/${media_id}-@${user_name}-(id:${user_id}).jpg`,
-              };
-
-              // Save image if new
-              if (this.isNew(media_id)) {
-                download.image(options)
-                  .then((result: DownloadResult) => {
-                    this.consoleLogGreen(`File saved to: ${result.filename}`)
-                  })
-                  .catch((err: Error) => {
-                    console.error(err)
-                  })
+              const media_url = greater.url
+              if (undefined === post.caption || null === post.caption) {
+                consoleLogRed('No caption found, aborting 🫤')
               } else {
-                this.consoleLogRed("File already exists, download aborted")
-              }
-            }
-          })
+                const media_id = post.caption.media_id
+                consoleLogYellow('One media found 😀')
+                consoleLogYellow(`URL: ${media_url}`)
 
-        } else {
-          console.log('No image found')
+                await saveImg(keyword, media_url, media_id, user_name, user_id);
+              }
+            } else {
+              consoleLogYellow('No image found 🫤');
+            }
+          } else {
+            consoleLogYellow('No post found 🫤')
+          }
         }
-      } else {
-        console.log('No post found')
+      } catch (error) {
+        consoleLogRed('Error while searching posts 🫤');
+        console.log(error);
       }
-    })
+    }, 60000)
   }
 
   private findGreaterImg(candidates: any) {
@@ -102,29 +79,4 @@ export default class IGApp {
 
     return greater;
   }
-
-  private isNew(media_id: string): boolean {
-    let isNew = true;
-    fs.readdirSync(this.path).forEach((file: string) => {
-      const pattern = new RegExp(/([0-9]*)(-@)(.*)/gm)
-      const res = pattern.exec(file)
-      if (res && res[1] === media_id) {
-        isNew = false;
-      }
-    })
-
-    return isNew;
-  }
-
-  private consoleLogGreen = function(s: string) {
-    console.log('\x1b[32m', s, '\x1b[0m')
-  };
-
-  private consoleLogRed = function(s: string) {
-    console.log('\x1b[31m', s, '\x1b[0m')
-  };
-
-  private consoleLogYellow = function(s: string) {
-    console.log('\x1b[33m', s, '\x1b[0m')
-  };
 }

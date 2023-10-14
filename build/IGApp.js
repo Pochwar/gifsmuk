@@ -35,26 +35,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var fs_1 = __importDefault(require("fs"));
-var image_downloader_1 = __importDefault(require("image-downloader"));
+var _utils_1 = require("./_utils");
 require('dotenv').config();
 var IgApiClient = require('instagram-private-api').IgApiClient;
-var mkdirp = require('mkdirp');
 var IGApp = /** @class */ (function () {
     function IGApp() {
-        this.consoleLogGreen = function (s) {
-            console.log('\x1b[32m', s, '\x1b[0m');
-        };
-        this.consoleLogRed = function (s) {
-            console.log('\x1b[31m', s, '\x1b[0m');
-        };
-        this.consoleLogYellow = function (s) {
-            console.log('\x1b[33m', s, '\x1b[0m');
-        };
         if (process.env.IG_USERNAME === undefined
             || process.env.IG_PASSWORD === undefined) {
             console.log('Please provide instagram\'s Username & Password in .env file');
@@ -65,17 +51,13 @@ var IGApp = /** @class */ (function () {
             this.password = process.env.IG_PASSWORD;
         }
     }
-    IGApp.prototype.setPath = function (path) {
-        this.path = path;
-    };
     IGApp.prototype.run = function (keyword) {
         return __awaiter(this, void 0, void 0, function () {
-            var loggedInUser, tags, posts;
+            var loggedInUser;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        this.setPath("downloaded_images/".concat(keyword));
                         this.client.state.generateDevice(this.username);
                         return [4 /*yield*/, this.client.simulate.preLoginFlow()];
                     case 1:
@@ -83,60 +65,64 @@ var IGApp = /** @class */ (function () {
                         return [4 /*yield*/, this.client.account.login(this.username, this.password)];
                     case 2:
                         loggedInUser = _a.sent();
-                        tags = this.client.feed.tags(keyword);
-                        return [4 /*yield*/, tags.items()];
-                    case 3:
-                        posts = _a.sent();
-                        posts.forEach(function (post) {
-                            if (undefined !== post) {
-                                if (undefined !== post.image_versions2) {
-                                    var user_id_1 = post.user.id;
-                                    var user_name_1 = post.user.username;
-                                    console.log('########################################');
-                                    console.log("New result found for keyword: ".concat(keyword));
-                                    console.log("User ID: ".concat(user_id_1));
-                                    console.log("User name: @".concat(user_name_1));
-                                    var candidates = post.image_versions2.candidates;
-                                    var greater = _this.findGreaterImg(candidates);
-                                    var media_url_1 = greater.url;
-                                    var media_id_1 = post.caption.media_id;
-                                    // Set subfolder path where to save images
-                                    var path_1 = "downloaded_images/".concat(keyword);
-                                    // Create subfolder if not exist
-                                    mkdirp("".concat(__dirname, "/../").concat(path_1), function (err) {
-                                        if (err) {
-                                            console.error(err);
-                                        }
-                                        else {
-                                            // Set download options
-                                            var options = {
-                                                url: media_url_1,
-                                                dest: "".concat(__dirname, "/../").concat(path_1, "/").concat(media_id_1, "-@").concat(user_name_1, "-(id:").concat(user_id_1, ").jpg"),
-                                            };
-                                            // Save image if new
-                                            if (_this.isNew(media_id_1)) {
-                                                image_downloader_1.default.image(options)
-                                                    .then(function (result) {
-                                                    _this.consoleLogGreen("File saved to: ".concat(result.filename));
-                                                })
-                                                    .catch(function (err) {
-                                                    console.error(err);
-                                                });
-                                            }
-                                            else {
-                                                _this.consoleLogRed("File already exists, download aborted");
-                                            }
-                                        }
-                                    });
+                        setInterval(function () { return __awaiter(_this, void 0, void 0, function () {
+                            var tags, posts, _i, posts_1, post, user_id, user_name, candidates, greater, media_url, media_id, error_1;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        _a.trys.push([0, 11, , 12]);
+                                        tags = this.client.feed.tags(keyword);
+                                        return [4 /*yield*/, tags.items()];
+                                    case 1:
+                                        posts = _a.sent();
+                                        _i = 0, posts_1 = posts;
+                                        _a.label = 2;
+                                    case 2:
+                                        if (!(_i < posts_1.length)) return [3 /*break*/, 10];
+                                        post = posts_1[_i];
+                                        if (!(undefined !== post)) return [3 /*break*/, 8];
+                                        user_id = post.user.id;
+                                        user_name = post.user.username;
+                                        console.log('########################################');
+                                        console.log("New result found for keyword: ".concat(keyword));
+                                        console.log("User ID: ".concat(user_id));
+                                        console.log("User name: @".concat(user_name));
+                                        if (!(undefined !== post.image_versions2)) return [3 /*break*/, 6];
+                                        candidates = post.image_versions2.candidates;
+                                        greater = this.findGreaterImg(candidates);
+                                        media_url = greater.url;
+                                        if (!(undefined === post.caption || null === post.caption)) return [3 /*break*/, 3];
+                                        (0, _utils_1.consoleLogRed)('No caption found, aborting 🫤');
+                                        return [3 /*break*/, 5];
+                                    case 3:
+                                        media_id = post.caption.media_id;
+                                        (0, _utils_1.consoleLogYellow)('One media found 😀');
+                                        (0, _utils_1.consoleLogYellow)("URL: ".concat(media_url));
+                                        return [4 /*yield*/, (0, _utils_1.saveImg)(keyword, media_url, media_id, user_name, user_id)];
+                                    case 4:
+                                        _a.sent();
+                                        _a.label = 5;
+                                    case 5: return [3 /*break*/, 7];
+                                    case 6:
+                                        (0, _utils_1.consoleLogYellow)('No image found 🫤');
+                                        _a.label = 7;
+                                    case 7: return [3 /*break*/, 9];
+                                    case 8:
+                                        (0, _utils_1.consoleLogYellow)('No post found 🫤');
+                                        _a.label = 9;
+                                    case 9:
+                                        _i++;
+                                        return [3 /*break*/, 2];
+                                    case 10: return [3 /*break*/, 12];
+                                    case 11:
+                                        error_1 = _a.sent();
+                                        (0, _utils_1.consoleLogRed)('Error while searching posts 🫤');
+                                        console.log(error_1);
+                                        return [3 /*break*/, 12];
+                                    case 12: return [2 /*return*/];
                                 }
-                                else {
-                                    console.log('No image found');
-                                }
-                            }
-                            else {
-                                console.log('No post found');
-                            }
-                        });
+                            });
+                        }); }, 60000);
                         return [2 /*return*/];
                 }
             });
@@ -154,17 +140,6 @@ var IGApp = /** @class */ (function () {
             }
         });
         return greater;
-    };
-    IGApp.prototype.isNew = function (media_id) {
-        var isNew = true;
-        fs_1.default.readdirSync(this.path).forEach(function (file) {
-            var pattern = new RegExp(/([0-9]*)(-@)(.*)/gm);
-            var res = pattern.exec(file);
-            if (res && res[1] === media_id) {
-                isNew = false;
-            }
-        });
-        return isNew;
     };
     return IGApp;
 }());
